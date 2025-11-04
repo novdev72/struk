@@ -508,6 +508,15 @@
             <span class="score-max">/ 5</span>
           </div>
         </div>
+        
+        <!-- Tambahan Skor Relevansi -->
+        <div class="score-item">
+          <span class="score-label">Relevansi Konten</span>
+          <div class="score-input">
+            <input type="number" id="relevance" min="0" max="5" step="0.1" value="0">
+            <span class="score-max">/ 5</span>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -614,9 +623,10 @@
       const value = getScoreValue('value');
       const engagement = getScoreValue('engagement');
       const consistency = getScoreValue('consistency');
+      const relevance = getScoreValue('relevance');
       
       // Calculate average score
-      const avgScore = (videoQuality + audioQuality + creativity + value + engagement + consistency) / 6;
+      const avgScore = (videoQuality + audioQuality + creativity + value + engagement + consistency + relevance) / 7;
 
       const nama = escapeHtml(namaRaw);
       const kategori = escapeHtml(kategoriRaw);
@@ -665,7 +675,7 @@
 
           <div class="section">
             <span class="label"><i class="fas fa-user-md"></i> Konsultan:</span>
-            <div class="preserve">Novian / novdev</div>
+            <div class="preserve">Dr. Novian (novdev)</div>
           </div>
 
           <hr>
@@ -722,6 +732,11 @@
                 <div class="score-title">Konsistensi</div>
                 <div class="score-value">${consistency.toFixed(1)}/5</div>
                 ${generateScoreBar(consistency)}
+              </div>
+              <div class="score-box">
+                <div class="score-title">Relevansi</div>
+                <div class="score-value">${relevance.toFixed(1)}/5</div>
+                ${generateScoreBar(relevance)}
               </div>
             </div>
           </div>
