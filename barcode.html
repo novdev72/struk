@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR Code (FIXED & QUIET ZONE)</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #linkInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; 
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            width: 100%; 
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #qr-code-box {
+            margin-top: 25px;
+            padding: 15px; /* Padding di kotak luar untuk estetika */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+            background-color: #fff; 
+        }
+        
+        /* === PERBAIKAN UTAMA: Styling untuk QR Code dan Quiet Zone === */
+        #qrcode {
+            /* qrcode.js akan menempatkan CANVAS di sini */
+            /* Kita tambahkan padding di sini yang akan menjadi quiet zone putih */
+            padding: 20px; /* <--- INI PENTING! Jarak putih di semua sisi */
+            background-color: white; /* Pastikan padding ini putih */
+            border-radius: 5px; /* Sudut sedikit melengkung */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Bayangan untuk estetika */
+            display: inline-block; /* Agar bisa di-align di tengah dan padding bekerja */
+            line-height: 0; /* Menghilangkan spasi ekstra di bawah canvas */
+        }
+
+        /* Styling untuk elemen Canvas yang dibuat oleh qrcode.js */
+        #qrcode canvas {
+            display: block; /* Penting untuk menghilangkan spasi bawah default */
+            /* Lebar dan tinggi diatur oleh qrcode.js, kita hanya memastikan tampil benar */
+        }
+
+        #downloadBtn {
+            background-color: #28a745;
+        }
+
+        #downloadBtn:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pembuat QR Code Link</h1>
+        <input type="url" id="linkInput" placeholder="Masukkan Link (URL) di sini...">
+        <button onclick="generateQRCode()">Buat QR Code</button>
+        
+        <div id="qr-code-box">
+            <div id="qrcode"></div>
+        </div>
+
+        <button id="downloadBtn" style="display: none;">
+            Unduh QR Code
+        </button>
+    </div>
+
+    <script>
+        function generateQRCode() {
+            const link = document.getElementById('linkInput').value.trim();
+            const qrcodeDiv = document.getElementById('qrcode');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (link === "") {
+                alert("Harap masukkan link (URL) terlebih dahulu!");
+                downloadBtn.style.display = 'none';
+                return;
+            }
+
+            qrcodeDiv.innerHTML = ""; // Hapus QR Code lama
+            
+            // Buat Instance QR Code baru. Kita tidak pakai opsi 'margin' di sini
+            // karena kita akan mengelola quiet zone melalui CSS padding
+            new QRCode(qrcodeDiv, {
+                text: link,
+                width: 150, // Ukuran QR Code murni (tanpa quiet zone)
+                height: 150,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+                // margin: 0 atau tidak perlu diatur, karena kita akan menggunakan padding CSS
+            });
+
+            // Beri jeda 50ms untuk memastikan elemen <canvas> telah dibuat
+            // sebelum menampilkan dan mengaktifkan tombol download
+            setTimeout(() => {
+                downloadBtn.style.display = 'block';
+                downloadBtn.onclick = downloadQRCode; 
+            }, 50); 
+        }
+
+        function downloadQRCode() {
+            const qrcodeDiv = document.getElementById('qrcode');
+            const canvasElement = qrcodeDiv.querySelector('canvas');
+            
+            if (!canvasElement) {
+                alert("QR Code belum dibuat atau elemen canvas tidak ditemukan.");
+                return;
+            }
+
+            try {
+                // Ambil gaya komputasi dari elemen #qrcode
+                const style = window.getComputedStyle(qrcodeDiv);
+                const paddingLeft = parseFloat(style.paddingLeft);
+                const paddingRight = parseFloat(style.paddingRight);
+                const paddingTop = parseFloat(style.paddingTop);
+                const paddingBottom = parseFloat(style.paddingBottom);
+
+                const qrWidth = canvasElement.width;
+                const qrHeight = canvasElement.height;
+
+                // Hitung total lebar dan tinggi untuk canvas baru (termasuk padding)
+                const newWidth = qrWidth + paddingLeft + paddingRight;
+                const newHeight = qrHeight + paddingTop + paddingBottom;
+
+                // Buat canvas baru untuk menggambar QR Code dengan padding
+                const paddedCanvas = document.createElement('canvas');
+                paddedCanvas.width = newWidth;
+                paddedCanvas.height = newHeight;
+                const ctx = paddedCanvas.getContext('2d');
+
+                // Isi latar belakang canvas baru dengan warna putih (untuk padding)
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, newWidth, newHeight);
+
+                // Gambar QR Code asli ke tengah canvas baru
+                ctx.drawImage(canvasElement, paddingLeft, paddingTop, qrWidth, qrHeight);
+
+                // Ambil data URL dari canvas baru yang sudah ada padding-nya
+                const dataURL = paddedCanvas.toDataURL('image/png'); 
+
+                if (!dataURL || dataURL === 'data:,') {
+                    alert("Gagal mendapatkan data gambar. Coba buat ulang QR Code.");
+                    return;
+                }
+
+                const a = document.createElement('a');
+                a.href = dataURL;
+                a.download = 'qrcode-link.png'; 
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+            } catch (e) {
+                alert("Terjadi kesalahan saat mengunduh: " + e.message);
+                console.error("Download Error:", e);
+            }
+        }
+    </script>
+</body>
+</html>
