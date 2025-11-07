@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KREATOR KITA | novdev</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Variabel Warna */
+        :root {
+            --primary-blue: #007bff;
+            --white: #FFFFFF;
+            --black: #1a1a1a;
+            --green: #25D366;
+            --red: #dc3545;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            font-family: 'Poppins', sans-serif;
+            color: var(--black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* --- STYLES BACKGROUND LAVA --- */
+        svg {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .lava-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            filter: url("#lava-effect"); 
+            z-index: -1;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            background: #4d88ff; 
+            opacity: 0.8; 
+            animation: blob-move 15s infinite alternate ease-in-out;
+        }
+
+        .blob.a { width: 150px; height: 150px; top: 10%; left: 10%; animation-duration: 20s; }
+        .blob.b { width: 250px; height: 250px; bottom: 5%; right: 15%; animation-duration: 18s; }
+        .blob.c { width: 100px; height: 100px; top: 50%; left: 30%; animation-duration: 14s; }
+        .blob.d { width: 300px; height: 300px; bottom: 20%; left: 5%; animation-duration: 25s; }
+        .blob.e { width: 200px; height: 200px; top: 5%; right: 5%; animation-duration: 16s; }
+        .blob.f { width: 180px; height: 180px; top: 70%; right: 30%; animation-duration: 22s; }
+
+        @keyframes blob-move {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-50px, 50px) scale(0.95); }
+            100% { transform: translate(80px, -80px) scale(1.1); }
+        }
+
+        /* Kontainer Konten */
+        .content-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- STYLES UTAMA UI APLIKASI --- */
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            z-index: 2;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 1. Splash/Login Screen */
+        #splashScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .welcome-text {
+            color: var(--primary-blue);
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .power-by {
+            color: #888;
+            font-size: 0.8em;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-blue);
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, var(--primary-blue), #4d88ff);
+        }
+        
+        #tokenInput {
+            width: 80%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 123, 255, 0.3);
+            border-radius: 25px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-align: center;
+            background-color: var(--input-bg);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #btnCheck {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 80%;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+            transition: background-color 0.2s;
+            margin-bottom: 15px;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 2. Main UI */
+        #mainUI {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding: 0;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            background-color: var(--card-bg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-icon {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .app-title {
+            color: var(--primary-blue);
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .app-subtitle {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #welcomeMessage {
+            color: var(--primary-blue);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Video Player dan Info */
+        #videoPlayerContainer {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            margin-bottom: 20px;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #videoFrame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: auto;
+        }
+
+        /* Video Info - Judul dan Deskripsi */
+        .video-info-container {
+            background: var(--input-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+        }
+
+        .video-title {
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 123, 255, 0.3);
+        }
+
+        .video-description {
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Recommendations */
+        #recommendationList {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #recommendations {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #recommendations li {
+            background-color: var(--input-bg);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95em;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        #recommendations li:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            color: var(--black);
+        }
+        .recommendation-desc {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+            margin-top: 2px;
+            max-height: 2.4em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Search Bar */
+        .search-bar-container {
+            display: flex;
+            align-items: center;
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            background-color: var(--card-bg);
+            position: sticky;
+            bottom: 0;
+            gap: 10px;
+            z-index: 100;
+            margin-top: auto;
+        }
+
+        #searchBar {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 123, 255, 0.3);
+            border-radius: 25px;
+            font-size: 1em;
+            background-color: var(--input-bg);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .whatsapp-button {
+            background-color: var(--green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        }
+
+        /* 3. Sidebar (Menu Status) */
+        #sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 80%;
+            max-width: 300px;
+            background-color: var(--card-bg);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
+            padding-top: 60px;
+            box-sizing: border-box;
+            text-align: left;
+            overflow-y: auto;
+        }
+
+        #sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
+        .sidebar h3 {
+            color: var(--primary-blue);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .sidebar p {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.9em;
+        }
+        
+        .sidebar p b {
+            font-weight: 700;
+            color: var(--black);
+        }
+
+        .sidebar-status-value {
+            font-weight: bold;
+            color: #555;
+            float: right;
+        }
+
+        .sidebar-status-value.valid { color: var(--green); }
+        .sidebar-status-value.expired { color: var(--red); }
+
+        #clearHistoryButton {
+            background-color: var(--red);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+
+        #historyList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #historyList li {
+            background-color: #f0f2f5;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .error-message {
+            color: var(--red);
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Responsif untuk desktop */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 600px;
+                height: 90vh;
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            
+            .content-area {
+                padding: 25px;
+            }
+            
+            .search-bar-container {
+                padding: 20px 25px;
+            }
+            
+            #searchBar {
+                padding: 14px 18px;
+                font-size: 1.05em;
+            }
+            
+            .whatsapp-button {
+                width: 50px;
+                height: 50px;
+                font-size: 1.6em;
+            }
+            
+            /* Background blobs lebih besar di desktop */
+            .blob.a { width: 200px; height: 200px; }
+            .blob.b { width: 350px; height: 350px; }
+            .blob.c { width: 150px; height: 150px; }
+            .blob.d { width: 400px; height: 400px; }
+            .blob.e { width: 300px; height: 300px; }
+            .blob.f { width: 250px; height: 250px; }
+        }
+
+        /* Untuk mobile - pastikan tidak ada yang nutupin keyboard */
+        @media (max-height: 700px) {
+            .search-bar-container {
+                padding: 12px 15px;
+            }
+            
+            #splashScreen {
+                padding: 20px 15px;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+            <filter id="lava-effect">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="25" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7" result="lava" />
+                <feBlend in="SourceGraphic" in2="lava" />
+            </filter>
+        </defs>
+    </svg>
+    <div class="lava-background">
+        <div class="blob a"></div>
+        <div class="blob b"></div>
+        <div class="blob c"></div>
+        <div class="blob d"></div>
+        <div class="blob e"></div>
+        <div class="blob f"></div>
+    </div>
+    
+    <div class="content-wrapper">
+        <div class="app-container">
+
+            <div id="sidebar" class="sidebar hidden">
+                <div class="sidebar-content">
+                    <h3>Status Key Access:</h3>
+                    <p>Key : <b id="sidebarKey" class="sidebar-status-value">N/A</b></p>
+                    <p>Nama : <b id="sidebarName" class="sidebar-status-value">N/A</b></p>
+                    <p>Status : <b id="sidebarStatus" class="sidebar-status-value valid">N/A</b></p>
+                    <p>Sisa waktu : <b id="sidebarTimeRemaining" class="sidebar-status-value">N/A</b></p>
+                    <p>Kadaluarsa : <b id="sidebarExpiry" class="sidebar-status-value">N/A</b></p>
+
+                    <h3>Riwayat Pilihan:</h3>
+                    <button id="clearHistoryButton">Clear Riwayat</button>
+                    <ul id="historyList">
+                        <!-- Riwayat akan dimuat di sini -->
+                    </ul>
+                </div>
+            </div>
+
+            <div id="splashScreen">
+                <h1 class="welcome-text">SELAMAT DATANG<br>KREATOR KITA</h1>
+                <p class="power-by">power by novdev</p>
+                <div class="logo"></div> 
+                
+                <input type="text" id="tokenInput" placeholder="Masukan key access...">
+                <button id="btnCheck">Masuk</button>
+                <div id="result" class="info-text">Masukan key untuk akses masuk</div>
+            </div>
+
+            <div id="mainUI" class="hidden">
+                <header class="main-header">
+                    <button id="menuButton" class="header-icon">&#9776;</button>
+                    <h2 class="app-title">KREATOR KITA <span class="app-subtitle">Study</span></h2>
+                    <button id="refreshVideoButton" class="header-icon">&#8635;</button>
+                </header>
+
+                <div class="content-area">
+                    <p id="welcomeMessage" class="hidden">HALO, (USERNAME KEY)</p>
+
+                    <!-- Video Info Container -->
+                    <div id="videoInfoContainer" class="video-info-container hidden">
+                        <div class="video-title" id="videoTitle">Judul Video</div>
+                        <div class="video-description" id="videoDescription">Deskripsi video akan muncul di sini...</div>
+                    </div>
+
+                    <div id="videoPlayerContainer" class="video-container hidden">
+                        <div id="videoPlaceholder" style="width:100%; height:100%; position:relative;">
+                            <iframe id="videoFrame" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <div id="recommendationList" class="recommendation-container hidden">
+                        <ul id="recommendations">
+                            <!-- Rekomendasi akan dimuat di sini -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="search-bar-container">
+                    <input type="text" id="searchBar" placeholder="Cari...">
+                    <a href="https://wa.me/+6285185917217" target="_blank" class="whatsapp-button">
+                        <i class="fab fa-whatsapp"></i>
+                    </a> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class KreatorKitaApp {
+            constructor() {
+                this.currentToken = null;
+                this.tokenData = null;
+                this.contentData = [];
+                this.currentVideo = null;
+                this.countdownInterval = null;
+                this.contentUpdateInterval = null;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.checkStoredToken();
+                this.startContentAutoUpdate();
+            }
+
+            initializeElements() {
+                // Screens
+                this.splashScreen = document.getElementById('splashScreen');
+                this.mainUI = document.getElementById('mainUI');
+                
+                // Login elements
+                this.tokenInput = document.getElementById('tokenInput');
+                this.btnCheck = document.getElementById('btnCheck');
+                this.resultDiv = document.getElementById('result');
+                
+                // Main UI elements
+                this.welcomeMessage = document.getElementById('welcomeMessage');
+                this.searchBar = document.getElementById('searchBar');
+                this.recommendationsList = document.getElementById('recommendations');
+                this.recommendationContainer = document.getElementById('recommendationList');
+                this.videoPl
